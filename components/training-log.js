@@ -31,17 +31,19 @@ function filterByPeriod(logs, period) {
   return logs.filter(log => new Date(log.date) >= cutoff);
 }
 
-function positionTagsHTML(positions) {
+function positionTagsHTML(positions, color = 'var(--accent-blue)') {
   if (!positions || positions.length === 0) return '';
   return positions.map(p => `
     <span style="
       display: inline-block;
       padding: 2px 8px;
       border-radius: var(--radius-full);
-      background: var(--accent-blue);
+      background: ${color};
       color: #fff;
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 600;
+      white-space: nowrap;
+      line-height: 1.4;
     ">${POSITION_LABELS[p] || p}</span>
   `).join('');
 }
@@ -163,80 +165,83 @@ class TrainingLog extends HTMLElement {
           </div>
           ${(log.positionsLost && log.positionsLost.length > 0) ? `
           <div>
-            <span style="color: var(--text-secondary); font-weight: 600;">Posições perdidas: </span>
-            <span style="display: inline-flex; flex-wrap: wrap; gap: 4px; vertical-align: middle;">
-              ${log.positionsLost.map(p => `
-                <span style="
-                  display: inline-block;
-                  padding: 2px 8px;
-                  border-radius: var(--radius-full);
-                  background: var(--accent-red);
-                  color: #fff;
-                  font-size: 0.72rem;
-                  font-weight: 600;
-                ">${POSITION_LABELS[p] || p}</span>
-              `).join('')}
-            </span>
+            <div style="color: var(--text-secondary); font-weight: 600; margin-bottom: 4px;">Posições perdidas:</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+              ${positionTagsHTML(log.positionsLost, 'var(--accent-red)')}
+            </div>
           </div>
           ` : ''}
         </div>
       `;
     }
 
+    const chevron = expanded ? '▲' : '▼';
+
     return `
-      <div class="log-card card" data-id="${log.id}" style="overflow: hidden; cursor: pointer;">
+      <div class="log-card card" data-id="${log.id}" style="overflow: hidden; cursor: pointer; transition: border-color 0.15s;">
         <!-- Card header -->
         <div class="log-card-header" data-id="${log.id}" style="
           display: flex;
-          align-items: center;
-          justify-content: space-between;
+          flex-direction: column;
+          gap: var(--space-2);
           padding: var(--space-3) var(--space-4);
-          gap: var(--space-3);
         ">
-          <div style="display: flex; align-items: center; gap: var(--space-3); flex: 1; min-width: 0;">
-            <!-- Date -->
+          <!-- Top row: date, duration, mood, actions -->
+          <div style="display: flex; align-items: center; gap: var(--space-3);">
             <div style="
               font-weight: 700;
               font-size: 1rem;
               color: var(--text-primary);
-              min-width: 48px;
+              min-width: 44px;
             ">${formatDate(log.date)}</div>
 
-            <!-- Duration -->
             <div style="
               font-size: 0.8rem;
               color: var(--text-secondary);
-              min-width: 36px;
+              padding: 2px 8px;
+              background: var(--bg-surface);
+              border-radius: var(--radius-full);
             ">${durationLabel}</div>
 
-            <!-- Mood -->
-            ${moodEmoji ? `<div style="font-size: 1.25rem;">${moodEmoji}</div>` : ''}
+            ${moodEmoji ? `<div style="font-size: 1.2rem;">${moodEmoji}</div>` : ''}
 
-            <!-- Position chips (got) -->
-            <div style="display: flex; flex-wrap: wrap; gap: 4px; flex: 1; min-width: 0;">
-              ${posGotHTML}
-            </div>
+            <div style="flex: 1;"></div>
+
+            <!-- Chevron -->
+            <span style="
+              color: var(--text-secondary);
+              font-size: 0.7rem;
+              transition: transform 0.2s;
+              ${expanded ? 'transform: rotate(180deg);' : ''}
+            ">${chevron}</span>
+
+            <!-- Delete button -->
+            <button
+              type="button"
+              class="btn-delete-log"
+              data-id="${log.id}"
+              style="
+                background: none;
+                border: none;
+                color: var(--text-secondary);
+                cursor: pointer;
+                font-size: 1rem;
+                padding: var(--space-1);
+                border-radius: var(--radius-sm);
+                line-height: 1;
+                flex-shrink: 0;
+                transition: color 0.15s;
+              "
+              title="Excluir treino"
+            >✕</button>
           </div>
 
-          <!-- Delete button -->
-          <button
-            type="button"
-            class="btn-delete-log"
-            data-id="${log.id}"
-            style="
-              background: none;
-              border: none;
-              color: var(--text-secondary);
-              cursor: pointer;
-              font-size: 1.1rem;
-              padding: var(--space-1);
-              border-radius: var(--radius-sm);
-              line-height: 1;
-              flex-shrink: 0;
-              transition: color 0.15s;
-            "
-            title="Excluir treino"
-          >✕</button>
+          <!-- Bottom row: position chips -->
+          ${posGotHTML ? `
+          <div style="display: flex; flex-wrap: wrap; gap: 4px; align-items: center;">
+            ${posGotHTML}
+          </div>
+          ` : ''}
         </div>
 
         ${expandedSection}
