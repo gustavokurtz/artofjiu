@@ -4,7 +4,7 @@
 const TABS = [
   { hash: '#modules',  label: 'Módulos',   icon: '📚', tag: 'tab-modules'  },
   { hash: '#gameplan', label: 'Game Plan', icon: '🗺️', tag: 'tab-gameplan' },
-  { hash: '#treino',   label: 'Treino',    icon: '🥋', tag: 'tab-treino'   },
+  { hash: '#training', label: 'Treino',    icon: '🥋', tag: 'tab-training' },
   { hash: '#config',   label: 'Config',    icon: '⚙️', tag: 'tab-config'   },
 ];
 
