@@ -7,7 +7,8 @@ function getDefaultState() {
     schemaVersion: SCHEMA_VERSION,
     modules: {},
     gameplan: {},
-    training: { logs: [], focusSubmissions: {} }
+    training: { logs: [], focusSubmissions: {} },
+    notes: []
   };
 }
 
@@ -139,6 +140,21 @@ export function updateFocusSubmission(slug, data) {
 export function removeFocusSubmission(slug) {
   return updateState(s => {
     delete s.training.focusSubmissions[slug];
+  });
+}
+
+// Notes helpers
+export function addNote(note) {
+  return updateState(s => {
+    if (!s.notes) s.notes = [];
+    s.notes.unshift(note);
+  });
+}
+
+export function deleteNote(noteId) {
+  return updateState(s => {
+    if (!s.notes) s.notes = [];
+    s.notes = s.notes.filter(n => n.id !== noteId);
   });
 }
 

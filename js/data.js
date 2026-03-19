@@ -243,6 +243,19 @@ export const GAMEPLAN_TREES = {
   }
 };
 
+export const NOTE_TAGS = [
+  "geral", "tecnica", "treino", "gameplan", "competicao", "professor"
+];
+
+export const NOTE_TAG_LABELS = {
+  "geral": "Geral",
+  "tecnica": "Técnica",
+  "treino": "Treino",
+  "gameplan": "Game Plan",
+  "competicao": "Competição",
+  "professor": "Perguntar ao Professor"
+};
+
 export const CHANNELS = [
   { name: "Feu BJJ", lang: "pt", description: "Maior canal BR de BJJ, GI, fundamentais" },
   { name: "Art of Jiu-Jitsu / AOJ", lang: "en", description: "Irmãos Mendes, GI 100%, sistemático" },
