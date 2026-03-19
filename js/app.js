@@ -7,3 +7,6 @@ import '../components/chip-select.js';
 import '../components/module-card.js';
 import '../components/module-detail.js';
 import '../components/tab-modules.js';
+import '../components/gameplan-node.js';
+import '../components/gameplan-tree.js';
+import '../components/tab-gameplan.js';
