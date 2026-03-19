@@ -432,10 +432,19 @@ class TabNotes extends HTMLElement {
       createdAt: new Date().toISOString()
     };
 
-    addNote(note);
+    // Reset form before saving (addNote triggers state-changed which re-renders list)
+    textArea.value = '';
+    actionArea.value = '';
+    dateInput.value = todayISO();
+    tagSelect.value = 'geral';
 
     this._formVisible = false;
-    // state-changed will trigger re-render
+    const wrapper = this.querySelector('.note-form-wrapper');
+    if (wrapper) wrapper.style.display = 'none';
+    const toggleBtn = this.querySelector('.btn-toggle-note-form');
+    if (toggleBtn) toggleBtn.textContent = '+ Nova Nota';
+
+    addNote(note);
   }
 }
 
