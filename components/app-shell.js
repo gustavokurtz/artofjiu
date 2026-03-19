@@ -9,8 +9,8 @@ const TABS = [
 ];
 
 const DEFAULT_HASH = '#modules';
+const UNLOCK_KEY = 'bjj-tracker-unlocked';
 
-// 🥋 Easter egg — type "oss" anywhere
 const MASTER_QUOTES = [
   { text: "Não existe cara durão pra estrangulamento.", author: "Hélio Gracie" },
   { text: "O Jiu-Jitsu é perfeito. São as pessoas que precisam melhorar.", author: "Hélio Gracie" },
@@ -26,91 +26,171 @@ const MASTER_QUOTES = [
   { text: "A maior vitória é aquela sobre si mesmo.", author: "Jigoro Kano" },
 ];
 
-let _ossBuffer = '';
-let _ossTimer = null;
-
-function initOssListener() {
-  document.addEventListener('keydown', (e) => {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
-
-    _ossBuffer += e.key.toLowerCase();
-    clearTimeout(_ossTimer);
-    _ossTimer = setTimeout(() => { _ossBuffer = ''; }, 1500);
-
-    if (_ossBuffer.includes('oss')) {
-      _ossBuffer = '';
-      showMasterQuote();
-    }
-  });
+function isUnlocked() {
+  return localStorage.getItem(UNLOCK_KEY) === '1';
 }
 
-function showMasterQuote() {
-  const existing = document.querySelector('.oss-overlay');
-  if (existing) existing.remove();
+class AppShell extends HTMLElement {
+  connectedCallback() {
+    if (isUnlocked()) {
+      this._boot();
+    } else {
+      this._renderLockScreen();
+    }
+  }
 
-  const quote = MASTER_QUOTES[Math.floor(Math.random() * MASTER_QUOTES.length)];
+  disconnectedCallback() {
+    if (this._boundOnHashChange) {
+      window.removeEventListener('hashchange', this._boundOnHashChange);
+    }
+  }
 
-  const overlay = document.createElement('div');
-  overlay.className = 'oss-overlay';
-  overlay.style.cssText = `
-    position: fixed; inset: 0; z-index: 9999;
-    display: flex; align-items: center; justify-content: center;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(8px);
-    animation: tab-fade-in 300ms ease both;
-    cursor: pointer;
-  `;
-  overlay.innerHTML = `
-    <div style="
-      max-width: 480px; padding: 40px 32px;
-      text-align: center;
-      animation: slide-up 500ms ease both;
-    ">
-      <div style="font-size: 3rem; margin-bottom: 24px;">🥋</div>
+  // ------------------------------------------------------- lock screen
+
+  _renderLockScreen() {
+    this.innerHTML = `
+      <div class="lock-screen" style="
+        position: fixed; inset: 0;
+        display: flex; align-items: center; justify-content: center;
+        background: var(--bg-primary);
+        z-index: 9999;
+      ">
+        <div style="
+          text-align: center;
+          max-width: 360px;
+          padding: 0 var(--space-4);
+          animation: slide-up 600ms ease both;
+        ">
+          <div style="font-size: 4rem; margin-bottom: var(--space-6);">🥋</div>
+          <h1 style="
+            font-family: var(--font-heading);
+            font-size: var(--text-2xl);
+            color: var(--text-primary);
+            margin-bottom: var(--space-2);
+          ">BJJ GI Study Tracker</h1>
+          <p style="
+            color: var(--text-secondary);
+            font-size: var(--text-sm);
+            margin-bottom: var(--space-8);
+          ">Saudação para entrar no tatame</p>
+          <input
+            type="text"
+            class="lock-input"
+            placeholder="..."
+            autocomplete="off"
+            spellcheck="false"
+            style="
+              width: 100%;
+              max-width: 200px;
+              text-align: center;
+              background: var(--bg-surface);
+              border: 2px solid rgba(255,255,255,0.1);
+              border-radius: var(--radius-lg);
+              color: var(--text-primary);
+              padding: var(--space-3) var(--space-4);
+              font-size: var(--text-lg);
+              font-family: var(--font-heading);
+              letter-spacing: 0.1em;
+              outline: none;
+              transition: border-color 0.2s;
+            "
+          />
+          <p class="lock-error" style="
+            color: var(--accent-red);
+            font-size: var(--text-xs);
+            margin-top: var(--space-2);
+            opacity: 0;
+            transition: opacity 0.2s;
+          ">Não é essa a saudação...</p>
+        </div>
+      </div>
+    `;
+
+    const input = this.querySelector('.lock-input');
+    const error = this.querySelector('.lock-error');
+    input.focus();
+
+    input.addEventListener('input', () => {
+      const val = input.value.trim().toLowerCase();
+      error.style.opacity = '0';
+      if (val === 'oss') {
+        this._unlock(input);
+      }
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const val = input.value.trim().toLowerCase();
+        if (val === 'oss') {
+          this._unlock(input);
+        } else if (val.length > 0) {
+          error.style.opacity = '1';
+          input.style.borderColor = 'var(--accent-red)';
+          setTimeout(() => {
+            input.style.borderColor = 'rgba(255,255,255,0.1)';
+          }, 600);
+        }
+      }
+    });
+  }
+
+  _unlock(input) {
+    input.disabled = true;
+    input.style.borderColor = 'var(--accent-green)';
+
+    localStorage.setItem(UNLOCK_KEY, '1');
+
+    const quote = MASTER_QUOTES[Math.floor(Math.random() * MASTER_QUOTES.length)];
+    const lockScreen = this.querySelector('.lock-screen');
+
+    // Show quote briefly, then transition to app
+    const quoteDiv = document.createElement('div');
+    quoteDiv.style.cssText = `
+      margin-top: var(--space-8);
+      animation: fade-in 500ms ease both;
+    `;
+    quoteDiv.innerHTML = `
       <p style="
         font-family: var(--font-heading);
-        font-size: 1.4rem;
+        font-size: var(--text-lg);
         color: var(--text-primary);
-        line-height: 1.5;
         font-style: italic;
-        margin-bottom: 20px;
+        line-height: 1.5;
+        margin-bottom: var(--space-3);
       ">"${quote.text}"</p>
       <p style="
-        font-size: 0.95rem;
+        font-size: var(--text-sm);
         color: var(--accent-blue);
         font-weight: 600;
       ">— ${quote.author}</p>
       <p style="
-        margin-top: 32px;
-        font-size: 0.75rem;
+        margin-top: var(--space-6);
+        font-size: var(--text-xs);
         color: var(--text-secondary);
-      ">OSS! 🤙 (clique para fechar)</p>
-    </div>
-  `;
-  overlay.addEventListener('click', () => {
-    overlay.style.opacity = '0';
-    overlay.style.transition = 'opacity 200ms ease';
-    setTimeout(() => overlay.remove(), 200);
-  });
-  document.body.appendChild(overlay);
-}
+      ">OSS! 🤙</p>
+    `;
+    input.parentElement.appendChild(quoteDiv);
 
-initOssListener();
+    setTimeout(() => {
+      lockScreen.style.transition = 'opacity 400ms ease';
+      lockScreen.style.opacity = '0';
+      setTimeout(() => {
+        lockScreen.remove();
+        this._boot();
+      }, 400);
+    }, 2500);
+  }
 
-class AppShell extends HTMLElement {
-  connectedCallback() {
+  // ------------------------------------------------------- app boot
+
+  _boot() {
     this._render();
     this._boundOnHashChange = this._onHashChange.bind(this);
     window.addEventListener('hashchange', this._boundOnHashChange);
 
-    // Wait for all tab components to be registered before first render
     const tabTags = TABS.map(t => t.tag);
     Promise.all(tabTags.map(tag => customElements.whenDefined(tag)))
       .then(() => this._applyHash());
-  }
-
-  disconnectedCallback() {
-    window.removeEventListener('hashchange', this._boundOnHashChange);
   }
 
   // ------------------------------------------------------------------ render
