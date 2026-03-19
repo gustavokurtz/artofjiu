@@ -14,3 +14,4 @@ import '../components/training-form.js';
 import '../components/training-log.js';
 import '../components/training-stats.js';
 import '../components/tab-training.js';
+import '../components/tab-config.js';
