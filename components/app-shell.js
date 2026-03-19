@@ -10,6 +10,93 @@ const TABS = [
 
 const DEFAULT_HASH = '#modules';
 
+// 🥋 Easter egg — type "oss" anywhere
+const MASTER_QUOTES = [
+  { text: "Não existe cara durão pra estrangulamento.", author: "Hélio Gracie" },
+  { text: "O Jiu-Jitsu é perfeito. São as pessoas que precisam melhorar.", author: "Hélio Gracie" },
+  { text: "Se você quer ser um leão, treine com leões.", author: "Carlson Gracie" },
+  { text: "Jiu-Jitsu é a arte de manter a calma quando todo mundo está tentando te matar.", author: "Renzo Gracie" },
+  { text: "O tatame é o espelho que não mente.", author: "Carlos Gracie Jr." },
+  { text: "Flua como a água. Se você não consegue ir por cima, vá por baixo.", author: "Jean Jacques Machado" },
+  { text: "O cara mais perigoso é aquele que sabe perder sem perder a cabeça.", author: "Rickson Gracie" },
+  { text: "Você não perde no Jiu-Jitsu. Ou você ganha, ou você aprende.", author: "Carlos Gracie Sr." },
+  { text: "O Jiu-Jitsu ensina que a pressão transforma carvão em diamante.", author: "Saulo Ribeiro" },
+  { text: "Faixa preta é uma faixa branca que nunca desistiu.", author: "Ditado do Jiu-Jitsu" },
+  { text: "Quanto mais você sua no treino, menos sangra na luta.", author: "Richard Marcinko" },
+  { text: "A maior vitória é aquela sobre si mesmo.", author: "Jigoro Kano" },
+];
+
+let _ossBuffer = '';
+let _ossTimer = null;
+
+function initOssListener() {
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+
+    _ossBuffer += e.key.toLowerCase();
+    clearTimeout(_ossTimer);
+    _ossTimer = setTimeout(() => { _ossBuffer = ''; }, 1500);
+
+    if (_ossBuffer.includes('oss')) {
+      _ossBuffer = '';
+      showMasterQuote();
+    }
+  });
+}
+
+function showMasterQuote() {
+  const existing = document.querySelector('.oss-overlay');
+  if (existing) existing.remove();
+
+  const quote = MASTER_QUOTES[Math.floor(Math.random() * MASTER_QUOTES.length)];
+
+  const overlay = document.createElement('div');
+  overlay.className = 'oss-overlay';
+  overlay.style.cssText = `
+    position: fixed; inset: 0; z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    animation: tab-fade-in 300ms ease both;
+    cursor: pointer;
+  `;
+  overlay.innerHTML = `
+    <div style="
+      max-width: 480px; padding: 40px 32px;
+      text-align: center;
+      animation: slide-up 500ms ease both;
+    ">
+      <div style="font-size: 3rem; margin-bottom: 24px;">🥋</div>
+      <p style="
+        font-family: var(--font-heading);
+        font-size: 1.4rem;
+        color: var(--text-primary);
+        line-height: 1.5;
+        font-style: italic;
+        margin-bottom: 20px;
+      ">"${quote.text}"</p>
+      <p style="
+        font-size: 0.95rem;
+        color: var(--accent-blue);
+        font-weight: 600;
+      ">— ${quote.author}</p>
+      <p style="
+        margin-top: 32px;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+      ">OSS! 🤙 (clique para fechar)</p>
+    </div>
+  `;
+  overlay.addEventListener('click', () => {
+    overlay.style.opacity = '0';
+    overlay.style.transition = 'opacity 200ms ease';
+    setTimeout(() => overlay.remove(), 200);
+  });
+  document.body.appendChild(overlay);
+}
+
+initOssListener();
+
 class AppShell extends HTMLElement {
   connectedCallback() {
     this._render();
