@@ -82,12 +82,21 @@ class StudyCheckbox extends HTMLElement {
     label.addEventListener('click', (e) => {
       e.preventDefault();
       const box = this.querySelector('.study-checkbox-box');
+      const wasChecked = this._checked;
+
       if (box) {
-        box.style.transform = 'scale(0.85)';
-        setTimeout(() => { box.style.transform = 'scale(1)'; }, 150);
+        if (!wasChecked) {
+          // Checking: scale up pulse animation
+          box.classList.remove('checkbox-check-anim');
+          // Force reflow to restart animation
+          void box.offsetWidth;
+          box.classList.add('checkbox-check-anim');
+        } else {
+          box.style.transform = 'scale(0.85)';
+          setTimeout(() => { box.style.transform = 'scale(1)'; }, 150);
+        }
       }
 
-      const wasChecked = this._checked;
       if (wasChecked) {
         this.removeAttribute('checked');
       } else {

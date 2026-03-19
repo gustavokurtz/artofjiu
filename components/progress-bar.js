@@ -53,6 +53,12 @@ class ProgressBar extends HTMLElement {
       const fill = this.querySelector('.progress-bar-fill');
       if (fill) {
         fill.style.width = `${percent}%`;
+        // Turn green when complete
+        if (percent >= 100) {
+          fill.classList.add('progress-bar-fill--complete');
+        } else {
+          fill.classList.remove('progress-bar-fill--complete');
+        }
       }
     });
   }
