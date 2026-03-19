@@ -13,9 +13,13 @@ const DEFAULT_HASH = '#modules';
 class AppShell extends HTMLElement {
   connectedCallback() {
     this._render();
-    this._applyHash();
     this._boundOnHashChange = this._onHashChange.bind(this);
     window.addEventListener('hashchange', this._boundOnHashChange);
+
+    // Wait for all tab components to be registered before first render
+    const tabTags = TABS.map(t => t.tag);
+    Promise.all(tabTags.map(tag => customElements.whenDefined(tag)))
+      .then(() => this._applyHash());
   }
 
   disconnectedCallback() {

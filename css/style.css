@@ -214,6 +214,31 @@ p {
 }
 
 /* ------------------------------------------------------------
+   App Header
+   ------------------------------------------------------------ */
+.app-header {
+  padding: var(--space-6) var(--space-4) var(--space-4);
+}
+
+.app-header__title {
+  font-size: var(--text-2xl);
+  color: var(--text-primary);
+}
+
+.app-header__subtitle {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin-top: var(--space-1);
+}
+
+/* Hide header on desktop (sidebar shows logo instead) */
+@media (min-width: 768px) {
+  .app-header {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------
    Bottom Tab Bar — Mobile
    ------------------------------------------------------------ */
 .tab-bar {
