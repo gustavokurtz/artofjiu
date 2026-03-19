@@ -10,3 +10,7 @@ import '../components/tab-modules.js';
 import '../components/gameplan-node.js';
 import '../components/gameplan-tree.js';
 import '../components/tab-gameplan.js';
+import '../components/training-form.js';
+import '../components/training-log.js';
+import '../components/training-stats.js';
+import '../components/tab-training.js';
